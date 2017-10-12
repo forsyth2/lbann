@@ -93,7 +93,6 @@ static const char *__attribute__((used)) _to_string(execution_mode m) {
   default:
     throw("Invalid execution mode specified"); /// @todo this should be an lbann_exception but then the class has to move to resolve dependencies
   }
-  return NULL;
 }
 
 /** Weight matrix initialization scheme */
@@ -161,5 +160,8 @@ static void __attribute__((used)) _display_matrix(ElMat *m, const char *name) {
 #define log_msg(...)
 #define log_simple_msg(...)
 #endif
+
+#define LBANN_MAKE_STR(x) _LBANN_MAKE_STR(x)
+#define _LBANN_MAKE_STR(x) #x
 
 #endif // LBANN_BASE_HPP

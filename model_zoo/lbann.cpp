@@ -162,9 +162,16 @@ int main(int argc, char *argv[]) {
     // Initalize model
     // @todo: not all callbacks code is in place
     sequential_model *model = init_model(comm, optimizer_fac, pb);
-    std::unordered_map<uint,uint> layer_mapping;
-    add_layers(model, data_readers, cudnn, pb, layer_mapping);
-    init_callbacks(comm, model, data_readers, pb, layer_mapping);
+
+    //maps: layer name (from prototext) to the lbann::layer
+    std::unordered_map<std::string, Layer*> name_mapping;
+    //maps: layer index (wrt lbann::sequential_model) to the lbann::layer
+    std::unordered_map<uint, Layer*> index_mapping;
+    //maps: layer name (from prototext)  to layer index (wrt lbann::sequential_model)
+    std::unordered_map<std::string, uint> name_to_index;
+
+    add_layers(model, data_readers, cudnn, pb, name_mapping, index_mapping, name_to_index);
+    init_callbacks(comm, model, data_readers, pb, name_mapping, index_mapping, name_to_index);
     model->setup();
 
     // Optionally run ltfb
@@ -200,6 +207,8 @@ int main(int argc, char *argv[]) {
       }
     }
 
+    if (not opts->has_string("exit_after_setup")) {
+
     ///////////////////////////////////////////////////////////////////
     // main loop for training/testing
     ///////////////////////////////////////////////////////////////////
@@ -211,12 +220,10 @@ int main(int argc, char *argv[]) {
     init_random(lbann_random_seed + comm->get_rank_in_world());
 #else
     if(comm->am_world_master()) {
-      std::cout << "--------------------------------------------------------------------------------"
-                << std::endl;
-      std::cout << "ALERT: executing in sequentially consistent mode -- performance will suffer"
-                << std::endl;
-      std::cout << "--------------------------------------------------------------------------------"
-                << std::endl;
+      std::cout << 
+        "--------------------------------------------------------------------------------\n"
+        "ALERT: executing in sequentially consistent mode -- performance will suffer\n"
+        "--------------------------------------------------------------------------------\n";
     }
 #endif
 
@@ -225,6 +232,18 @@ int main(int argc, char *argv[]) {
 
     // Evaluate model on test set
     model->evaluate(execution_mode::testing);
+
+    } 
+
+    else {
+      if (comm->am_world_master()) {
+        std::cout << 
+          "--------------------------------------------------------------------------------\n"
+          "ALERT: model has been setup; we are now exiting due to command\n"
+          "       line option: --exit_after_setup\n"
+          "--------------------------------------------------------------------------------\n";
+      }
+    }
 
     // @todo: figure out and implement coherent strategy
     // for freeing dynamically allocated memory

@@ -44,6 +44,8 @@ class target_layer : public io_layer {
   target_layer(lbann_comm *comm, std::map<execution_mode, generic_data_reader *> data_readers, bool shared_data_reader, bool for_regression = false)
     : io_layer(comm, data_readers, true, for_regression) {
     m_shared_data_reader = shared_data_reader;
+    // Target layers have no children
+    m_max_num_child_layers = 0;
   }
 
   virtual ~target_layer() {
@@ -151,7 +153,7 @@ class target_layer : public io_layer {
     }
     
     // Initialize objective function
-    this->m_neural_network_model->m_obj_fn->setup(*this->m_prev_layer);
+    this->m_neural_network_model->m_obj_fn->setup(*this->m_parent_layers[0]);
 
   }
 

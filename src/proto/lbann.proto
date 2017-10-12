@@ -17,7 +17,7 @@ message DataReader {
 }
 
 message Reader {
-  string name = 1; //mnist, nci, nci_regression, numpy, imagenet, synthetic
+  string name = 1; //mnist, nci, nci_regression, numpy, imagenet, synthetic, merge_samples
   string role = 3; //train, test
   bool shuffle = 4;
   string data_filedir = 5;
@@ -39,7 +39,9 @@ message Reader {
   int32 label_col = 106;
   int32 response_col = 107;
   bool disable_labels = 108;
-  bool disable_reponses = 109;
+  bool disable_responses = 109;
+  string format = 110; // numpy, csv
+  string data_file_pattern = 111;
 }
 
 message ImagePreprocessor {
@@ -318,8 +320,8 @@ message CallbackGradientCheck {
 //
 
 message Layer {
-   int64 index = 50; 
-   int64 parent = 51;
+   string name = 50; 
+   string parent = 51;
    string data_layout = 52;
    bool num_neurons_from_data_reader = 53;
 
@@ -331,6 +333,7 @@ message Layer {
    InputPartitionedMiniBatch input_partitioned_minibatch = 3;
 
    // transform Layers
+   Reshape reshape = 306;
    Pooling pooling = 12;
    Concatenation concatenation = 300;
    Slice slice = 301;
@@ -444,6 +447,11 @@ message InputPartitionedMiniBatch {
 //////////////////////
 // transform Layers //
 //////////////////////
+message Reshape {
+  int64 num_dims = 1;
+  string dims = 2; //should be space-separated list of ints, e.g, "2 6 7"
+}
+
 message Pooling {
   int64 num_dims = 1;
 
@@ -466,7 +474,7 @@ message Pooling {
 
 message Unpooling {
   int64 num_dims = 1;
-  int64 pooling_layer = 13; //should be index of pooling layer
+  string pooling_layer = 13; //should be name of the pooling layer
 }
 
 
