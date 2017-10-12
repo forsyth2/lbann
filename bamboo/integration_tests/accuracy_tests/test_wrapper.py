@@ -2,8 +2,8 @@ import os, sys, re
 import pytest
 
 
-def run_lbann(test='accuracy_test.sh',model='mnist',optimizer='adagrad',epochs=5,nodes=4,procs=2,iterative=0):
-    CMD = './' + test + ' -m ' + model + ' -o ' + optimizer + ' -N %d -n %d -e %d'% (nodes, procs, epochs)
+def run_lbann(test='accuracy_test.sh',model='mnist',optimizer='adagrad',epochs=5,nodes=4,procs=2,iterative=0,executable):
+    CMD = './' + test + ' -exe ' + executable +  ' -m ' + model + ' -o ' + optimizer + ' -N %d -n %d -e %d'% (nodes, procs, epochs)
     if iterative == 1:
         CMD = CMD + ' -i'
         print CMD
@@ -30,23 +30,21 @@ def fetch_true(master,model,model_num,epochs):
     return true_acc
 
 
-def test_accuracy_mnist(log):
+def test_accuracy_mnist(log,exe):
     
     # use run_lbann calls here to generate accuracy files. All generated accuracies will be tested in the below assertion loop
     # Default to MNIST with adagrad and 5 epochs. 
-    run_lbann(iterative=1)
+    run_lbann(epochs=2,executable=exe)
     general_assert('mnist') 
     
-    # When running in something like Bamboo we don't really need these accuracy files sticking around, but give the option for Users outside of Bamboo
-    # Probably break this off into a clean up function
     if log == 0:
         os.system("rm trimmed*")
 
-#def test_accuracy_alexnet(log):
-#    run_lbann(iterative=1,model='alexnet')
-#    general_assert('alexnet')
-#    if log == 0:
-#        os.system("rm trimmed*")
+def test_accuracy_alexnet(log,exe):
+    run_lbann(model='alexnet',epochs=2,executable=exe)
+    general_assert('alexnet')
+    if log == 0:
+        os.system("rm trimmed*")
 
 #def test_accuracy_resnet(log):
 #    run_lbann(iterative=1,model='resnet')
@@ -68,5 +66,3 @@ def general_assert(model):
             true_acc = fetch_true('master.txt',model,model_num,epochs)
             for test, true in zip(test_acc,true_acc):
                 assert true <= test
-
-
