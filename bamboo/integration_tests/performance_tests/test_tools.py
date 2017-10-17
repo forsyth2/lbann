@@ -81,11 +81,11 @@ def csv_to_dict(csv_path):
     expected_times = {}
     for row in reader:
       model = row[0]
-      expected_times[model] = dict(zip(keys[1:], row[1:]))
+      expected_times[model] = dict(zip(keys[1:], map(float, row[1:])))
   return expected_times
 
-def run_tests(tester, performance, model_name):
-  expted_times = csv_to_dict('expected_performance.csv')
+def run_tests(performance, model_name):
+  expected_times = csv_to_dict('integration_tests/performance_tests/expected_performance.csv')
   errors = []
   for model_num in performance.keys():
     p = performance[model_num]

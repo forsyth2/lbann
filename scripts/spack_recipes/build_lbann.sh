@@ -1,4 +1,7 @@
-#!/bin/sh
+#!/bin/bash
+
+. $bamboo_SPACK_ROOT/share/spack/setup-env.sh
+# export PATH=../../../../LBANN-NIGHTD-CS/bin:$PATH
 
 SPACK_RECIPES=`dirname ${0}`
 #Set Script Name variable
